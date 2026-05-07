@@ -1,22 +1,22 @@
-import React from 'react'
+import { Link } from "react-router-dom"
 
 const Navbar = () => {
   return (
-    <div>
-        {/* Navbar / Header */}
-      <header style={{background: "#111",color: "white",padding: "15px"}}>
-        <h1>TeddyDev</h1>
-        <nav>
-          <ul style={{display: "flex", gap:"20px", liststyle: "none"}}>
-            <li>Home</li>
-            <li>About</li>
-            <li>Services</li>
-            <li>Contact</li>
-            <li>Blog</li>
+    <div className="bg-white flex justify-between items-center text-black p-5">
+      
+      {/* Left side */}
+      <div className="flex flex-col">
+        <h2 className="text-3xl font-bold text-amber-500">EVE COSMETICS</h2>
+        
+      </div>
 
-          </ul>
-        </nav>
-      </header>
+      {/* Right side */}
+      <ul className="flex gap-6">
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/open-account">Open Account</Link></li>
+        <li><Link to="/login">Login</Link></li>
+      </ul>
+
     </div>
   )
 }

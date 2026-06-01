@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { auth } from "../firebase"
 
 const OpenAccount = () => {
 
@@ -6,11 +8,11 @@ const OpenAccount = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-
   const [error, setError] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     // Validation
@@ -29,9 +31,35 @@ const OpenAccount = () => {
       return
     }
 
-    // Success
-    setError("")
-    setSubmitted(true)
+    // Firebase Signup
+    try {
+      setLoading(true)
+      setError("")
+
+      // Create user in Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
+      // Save their name to Firebase profile
+      await updateProfile(userCredential.user, {
+        displayName: name
+      })
+
+      setSubmitted(true)
+
+    } catch (err) {
+      // Handle Firebase specific errors
+      if (err.code === "auth/email-already-in-use") {
+        setError("This email is already registered. Please login instead.")
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.")
+      } else if (err.code === "auth/weak-password") {
+        setError("Password is too weak. Use at least 6 characters.")
+      } else {
+        setError("Something went wrong. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -57,7 +85,7 @@ const OpenAccount = () => {
         {submitted ? (
 
           <div className="bg-green-100 text-green-700 p-4 rounded-lg text-center">
-            Thank you {name}! Your account has been created
+            🎉 Welcome {name}! Your account has been created successfully.
           </div>
 
         ) : (
@@ -92,8 +120,11 @@ const OpenAccount = () => {
               className="border border-yellow-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
 
-            <button className="bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition">
-              Create Account
+            <button
+              disabled={loading}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
 
           </form>
